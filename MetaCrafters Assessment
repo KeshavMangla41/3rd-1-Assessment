@@ -1,0 +1,123 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract SimpleStorage {
+    uint256 private storedNumber;
+
+    // Function to store a number
+    function storeNumber(uint256 number) public {
+        storedNumber = number;
+    }
+
+    // Function to retrieve the stored number
+    function retrieveNumber() public view returns (uint256) {
+        return storedNumber;
+    }
+
+    // Function to double the stored number
+    function doubleNumber() public view returns (uint256) {
+        return storedNumber * 2;
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Storage</title>
+</head>
+<body>
+    <h1>Simple Storage Contract</h1>
+    <div>
+        <input type="number" id="numberInput" placeholder="Enter a number">
+        <button onclick="storeNumber()">Store Number</button>
+    </div>
+    <div>
+        <button onclick="retrieveNumber()">Retrieve Number</button>
+        <p id="retrievedNumber"></p>
+    </div>
+    <div>
+        <button onclick="doubleNumber()">Double Number</button>
+        <p id="doubledNumber"></p>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.6.1/dist/web3.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+const contractABI = [
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "number",
+                "type": "uint256"
+            }
+        ],
+        "name": "storeNumber",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "retrieveNumber",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "doubleNumber",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }
+];
+
+const contractAddress = 'YOUR_CONTRACT_ADDRESS_HERE';
+
+let web3;
+let simpleStorage;
+
+window.addEventListener('load', async () => {
+    if (window.ethereum) {
+        web3 = new Web3(window.ethereum);
+        try {
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+            simpleStorage = new web3.eth.Contract(contractABI, contractAddress);
+        } catch (error) {
+            console.error('User denied account access', error);
+        }
+    } else {
+        console.error('No Ethereum browser extension detected');
+    }
+});
+
+async function storeNumber() {
+    const number = document.getElementById('numberInput').value;
+    const accounts = await web3.eth.getAccounts();
+    simpleStorage.methods.storeNumber(number).send({ from: accounts[0] });
+}
+
+async function retrieveNumber() {
+    const result = await simpleStorage.methods.retrieveNumber().call();
+    document.getElementById('retrievedNumber').innerText = 'Stored Number: ' + result;
+}
+
+async function doubleNumber() {
+    const result = await simpleStorage.methods.doubleNumber().call();
+    document.getElementById('doubledNumber').innerText = 'Doubled Number: ' + result;
+}
